@@ -29,15 +29,15 @@ League_tweets = tweepy.Cursor(api.search_tweets, q=keywords_league, lang='en', c
 Dota_tweets = tweepy.Cursor(api.search_tweets, q=keywords_dota, lang='en', count = 100,
                               tweet_mode= 'extended').items(limit)
 
-columns = ['Time','User','Tweet']
+columns = ['Tweet']
 data_lol = []
 data_dota = []
 
 for tweet in League_tweets:
-    data_lol.append([tweet.created_at, tweet.user.screen_name, tweet.full_text])
+    data_lol.append([tweet.full_text])
 
 for tweet in Dota_tweets:
-    data_dota.append([tweet.created_at, tweet.user.screen_name, tweet.full_text])
+    data_dota.append([tweet.full_text])
 
 df_lol = pd.DataFrame(data_lol, columns = columns)
 df_dota = pd.DataFrame(data_dota, columns = columns)

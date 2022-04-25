@@ -1,21 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
-
-tweet = "@BobassdreShakarami I guess league is one of those games you love to hate haha @LeagueOfLegends @Tylerxd :V"
-
-#preprocess tweet
-tweet_words = []
-
-for word in tweet.split(' '):
-    if word.startswith('@') and len(word) > 1:
-        word = '@user'
-    elif word.startswith('http'):
-        word = 'http'
-    tweet_words.append(word)
-
-tweet_proc = " ".join(tweet_words)
-
-print(tweet_proc)
+import pandas as pd
 
 #loading the model and tokenizer
 
@@ -26,20 +11,35 @@ tokenizer = AutoTokenizer.from_pretrained(roberta)
 
 labels = ['Negative','Neutral','Positive']
 
+
+#preprocess tweet
+dota_tweets = pd.read_csv('tweets_dota.csv')
+
+tweet_proc_dota = []
+
+for line in dota_tweets['Tweet']:
+    tweet_words = []
+    for word in line.split(' '):
+        if word.startswith('@') and len(word) > 1:
+            word = '@user'
+        elif word.startswith('http'):
+            word = 'http'
+        tweet_words.append(word)
+    joined = " ".join(tweet_words)
+    tweet_proc_dota.append(joined)
+
 #Analysis
 
-encoded_tweet = tokenizer(tweet_proc, return_tensors = 'pt')
-print(encoded_tweet)
+for tweet in tweet_proc_dota:
+    encoded_tweet = tokenizer(tweet, return_tensors = 'pt')
+    #print(encoded_tweet)
+    output = model(**encoded_tweet)
+    #print(output)
+    scores =output[0][0].detach().numpy()
+    scores =softmax(scores)
+    print("Tweet: ", tweet)
+    for i in range(len(scores)):
+        l = labels[i]
+        s = scores[i]
+        print(l,s)
 
-output = model(**encoded_tweet)
-
-print(output)
-
-scores =output[0][0].detach().numpy()
-scores =softmax(scores)
-
-for i in range(len(scores)):
-    l = labels[i]
-    s = scores[i]
-
-    print(l,s)
