@@ -14,8 +14,10 @@ labels = ['Negative','Neutral','Positive']
 
 #preprocess tweet
 dota_tweets = pd.read_csv('tweets_dota.csv')
+league_tweets = pd.read_csv('tweets_lol.csv')
 
 tweet_proc_dota = []
+tweet_proc_lol = []
 
 for line in dota_tweets['Tweet']:
     tweet_words = []
@@ -28,8 +30,22 @@ for line in dota_tweets['Tweet']:
     joined = " ".join(tweet_words)
     tweet_proc_dota.append(joined)
 
+for line in league_tweets['Tweet']:
+    tweet_words = []
+    for word in line.split(' '):
+        if word.startswith('@') and len(word) > 1:
+             word = '@user'
+        elif word.startswith('http'):
+            word = 'http'
+        tweet_words.append(word)
+    joined = " ".join(tweet_words)
+    tweet_proc_lol.append(joined)
+
 #Analysis
 
+feelings_dota = []
+
+print("Dota 2")
 for tweet in tweet_proc_dota:
     encoded_tweet = tokenizer(tweet, return_tensors = 'pt')
     #print(encoded_tweet)
@@ -37,9 +53,41 @@ for tweet in tweet_proc_dota:
     #print(output)
     scores =output[0][0].detach().numpy()
     scores =softmax(scores)
-    print("Tweet: ", tweet)
+    #print("Tweet: ", tweet)
+    mostfeel = 0.0
+    currentfeeling = 'Positive'
+    for i in range(len(scores)):
+        if scores[i] > mostfeel:
+            mostfeel = scores[i]
+            currentfeeling = labels[i]
     for i in range(len(scores)):
         l = labels[i]
         s = scores[i]
-        print(l,s)
+        #print(l,s)
+    feelings_dota.append(currentfeeling)
 
+print('Dota 2 feelings for Positive, Neutral, and Negative', feelings_dota.count('Positive'), feelings_dota.count('Neutral'), feelings_dota.count('Negative'))
+
+feelings_lol = []
+
+print("League of Legends")
+for tweet in tweet_proc_lol:
+    encoded_tweet = tokenizer(tweet, return_tensors = 'pt')
+    #print(encoded_tweet)
+    output = model(**encoded_tweet)
+    #print(output)
+    scores =output[0][0].detach().numpy()
+    scores =softmax(scores)
+    #print("Tweet: ", tweet)
+    mostfeel = 0.0
+    currentfeeling = 'Positive'
+    for i in range(len(scores)):
+        if scores[i] > mostfeel:
+            mostfeel = scores[i]
+            currentfeeling = labels[i]
+        l = labels[i]
+        s = scores[i]
+        #print(l,s)
+    feelings_lol.append(currentfeeling)
+
+print('League feelings for Positive, Neutral, and Negative', feelings_lol.count('Positive'), feelings_lol.count('Neutral'), feelings_lol.count('Negative'))
