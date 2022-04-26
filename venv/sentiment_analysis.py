@@ -11,7 +11,6 @@ tokenizer = AutoTokenizer.from_pretrained(roberta)
 
 labels = ['Negative','Neutral','Positive']
 
-
 #preprocess tweet
 dota_tweets = pd.read_csv('tweets_dota.csv')
 league_tweets = pd.read_csv('tweets_lol.csv')
@@ -42,8 +41,8 @@ for line in league_tweets['Tweet']:
     tweet_proc_lol.append(joined)
 
 #Analysis
-
 feelings_dota = []
+feelings_lol = []
 
 print("Dota 2")
 for tweet in tweet_proc_dota:
@@ -53,22 +52,14 @@ for tweet in tweet_proc_dota:
     #print(output)
     scores =output[0][0].detach().numpy()
     scores =softmax(scores)
-    #print("Tweet: ", tweet)
     mostfeel = 0.0
     currentfeeling = 'Positive'
     for i in range(len(scores)):
         if scores[i] > mostfeel:
             mostfeel = scores[i]
             currentfeeling = labels[i]
-    for i in range(len(scores)):
-        l = labels[i]
-        s = scores[i]
-        #print(l,s)
     feelings_dota.append(currentfeeling)
-
 print('Dota 2 feelings for Positive, Neutral, and Negative', feelings_dota.count('Positive'), feelings_dota.count('Neutral'), feelings_dota.count('Negative'))
-
-feelings_lol = []
 
 print("League of Legends")
 for tweet in tweet_proc_lol:
@@ -78,16 +69,11 @@ for tweet in tweet_proc_lol:
     #print(output)
     scores =output[0][0].detach().numpy()
     scores =softmax(scores)
-    #print("Tweet: ", tweet)
     mostfeel = 0.0
     currentfeeling = 'Positive'
     for i in range(len(scores)):
         if scores[i] > mostfeel:
             mostfeel = scores[i]
             currentfeeling = labels[i]
-        l = labels[i]
-        s = scores[i]
-        #print(l,s)
     feelings_lol.append(currentfeeling)
-
 print('League feelings for Positive, Neutral, and Negative', feelings_lol.count('Positive'), feelings_lol.count('Neutral'), feelings_lol.count('Negative'))
